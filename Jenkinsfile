@@ -1,5 +1,5 @@
 pipeline {
-    agent none // No usamos agente global, cada stage define su propio agent
+    agent none // No usamos agente global
 
     environment {
         REPO_URL = 'https://github.com/JOH4444N/buggy-cars-rating.git'
@@ -17,13 +17,8 @@ pipeline {
                             string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN'),
                             string(credentialsId: 'record-key-buggy-cars-rating', variable: 'CYPRESS_RECORD_KEY')
                         ]) {
-                            // Clonar repositorio usando token seguro
                             git url: "${REPO_URL}", branch: 'main', credentialsId: 'github-token'
-
-                            // Instalar dependencias
                             bat 'npm ci'
-
-                            // Ejecutar Cypress en paralelo con registro en Cypress Cloud
                             bat "npx cypress run --record --key %CYPRESS_RECORD_KEY% --parallel"
                         }
                     }
@@ -46,13 +41,17 @@ pipeline {
             } // end parallel
         } // end stage 'Parallel Cypress Tests'
 
+        stage('Archive Artifacts') {
+            agent { label 'cypress1' } // cualquier nodo disponible
+            steps {
+                echo 'Archiving Cypress videos and screenshots...'
+                archiveArtifacts artifacts: 'cypress/videos/**/*, cypress/screenshots/**/*', allowEmptyArchive: true
+            }
+        }
+
     } // end stages
 
     post {
-        always {
-            // Guardar artifacts de Cypress: videos y screenshots
-            archiveArtifacts artifacts: 'cypress/videos/**/*, cypress/screenshots/**/*', allowEmptyArchive: true
-        }
         success {
             echo 'Build successful! ✅'
         }
