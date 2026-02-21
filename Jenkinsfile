@@ -1,5 +1,5 @@
 pipeline {
-    agent none // No usamos agente global, cada stage define el suyo
+    agent none // No usamos agente global, cada stage define su propio agent
 
     environment {
         REPO_URL = 'https://github.com/JOH4444N/buggy-cars-rating.git'
