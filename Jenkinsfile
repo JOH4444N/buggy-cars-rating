@@ -23,7 +23,7 @@ pipeline {
                             // Instalar dependencias
                             bat 'npm ci'
 
-                            // Ejecutar Cypress con paralelismo y registro en Cypress Cloud
+                            // Ejecutar Cypress en paralelo con registro en Cypress Cloud
                             bat "npx cypress run --record --key %CYPRESS_RECORD_KEY% --parallel"
                         }
                     }
@@ -42,9 +42,11 @@ pipeline {
                         }
                     }
                 }
-            }
-        }
-    }
+
+            } // end parallel
+        } // end stage 'Parallel Cypress Tests'
+
+    } // end stages
 
     post {
         always {
@@ -58,4 +60,5 @@ pipeline {
             echo 'Build failed ❌'
         }
     }
-}
+
+} // end pipeline
