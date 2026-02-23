@@ -1,50 +1,33 @@
 pipeline {
-    agent {
-        docker {
-            image 'cypress/included:13.6.0'
-            args '-u root'
-        }
-    }
+    agent any
 
     environment {
         CYPRESS_RECORD_KEY = credentials('record-key-buggy-cars-rating')
     }
 
-    options {
-        timestamps()
-        disableConcurrentBuilds()
-    }
-
     stages {
-
-        stage('Checkout') {
+        stage('Install deps') {
             steps {
-                checkout scm
+                bat 'npm ci'
             }
         }
 
-        stage('Install dependencies') {
+        stage('Run Cypress in Docker') {
             steps {
-                sh 'npm ci'
-            }
-        }
-
-        stage('Run Cypress Tests') {
-            steps {
-                sh 'npx cypress run --record --parallel'
+                bat '''
+                docker run --rm ^
+                  -v "%cd%:/e2e" ^
+                  -w /e2e ^
+                  -e CYPRESS_RECORD_KEY ^
+                  cypress/included:13.6.0
+                '''
             }
         }
     }
 
     post {
         always {
-            archiveArtifacts artifacts: 'cypress/videos/**, cypress/screenshots/**', allowEmptyArchive: true
-        }
-        success {
-            echo 'Build successful ✅'
-        }
-        failure {
-            echo 'Build failed ❌'
+            archiveArtifacts artifacts: 'cypress/videos/**,cypress/screenshots/**', allowEmptyArchive: true
         }
     }
 }
