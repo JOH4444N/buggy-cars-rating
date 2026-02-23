@@ -192,4 +192,8 @@ describe('Validación HU-01 — Registro de usuario',()=>{
         .should('be.visible')
         .and('contain','User already exists')
     })
+
+    it('prueba trigger',()=>{
+        cy.title().shloud('contain','buggy')
+    })
 })
