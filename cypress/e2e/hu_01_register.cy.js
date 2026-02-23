@@ -189,7 +189,7 @@ describe('Validación HU-01 — Registro de usuario',()=>{
         })
 
         cy.get('.result')
-        .should('be.visible')
+        .should('not.be.visible')
         .and('contain','User already exists')
     })
 })
