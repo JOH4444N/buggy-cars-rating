@@ -2,11 +2,18 @@ pipeline {
     agent any
 
     environment {
-        CYPRESS_RECORD_KEY = credentials('record-key-buggy-cars-rating')
+        CYPRESS_RECORD_KEY = credentials('cypress-record-key')
     }
 
     stages {
-        stage('Install deps') {
+
+        stage('Checkout SCM') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Install dependencies') {
             steps {
                 bat 'npm ci'
             }
@@ -19,7 +26,8 @@ pipeline {
                   -v "%cd%:/e2e" ^
                   -w /e2e ^
                   -e CYPRESS_RECORD_KEY ^
-                  cypress/included:13.6.0
+                  cypress/included:13.6.0 ^
+                  cypress run --record --config video=false,screenshotOnRunFailure=false
                 '''
             }
         }
@@ -27,7 +35,13 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: 'cypress/videos/**,cypress/screenshots/**', allowEmptyArchive: true
+            echo 'Pipeline finished'
+        }
+        success {
+            echo 'Build SUCCESS ✅'
+        }
+        failure {
+            echo 'Build FAILED ❌'
         }
     }
 }
