@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        CYPRESS_RECORD_KEY = credentials('cypress-record-key')
+        CYPRESS_RECORD_KEY = credentials('record-key-buggy-cars-rating')
     }
 
     stages {
