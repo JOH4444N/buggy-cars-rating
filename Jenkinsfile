@@ -1,63 +1,50 @@
 pipeline {
-    agent none // No usamos agente global
+    agent {
+        docker {
+            image 'cypress/included:13.6.0'
+            args '-u root'
+        }
+    }
 
     environment {
-        REPO_URL = 'https://github.com/JOH4444N/buggy-cars-rating.git'
+        CYPRESS_RECORD_KEY = credentials('record-key-buggy-cars-rating')
+    }
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
     }
 
     stages {
 
-        stage('Parallel Cypress Tests') {
-            parallel {
-
-                stage('Cypress Agent 1') {
-                    agent { label 'cypress1' }
-                    steps {
-                        withCredentials([
-                            string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN'),
-                            string(credentialsId: 'record-key-buggy-cars-rating', variable: 'CYPRESS_RECORD_KEY')
-                        ]) {
-                            git url: "${REPO_URL}", branch: 'main', credentialsId: 'github-token'
-                            bat 'npm ci'
-                            bat "npx cypress run --record --key %CYPRESS_RECORD_KEY% --parallel"
-                        }
-                    }
-                }
-
-                stage('Cypress Agent 2') {
-                    agent { label 'cypress2' }
-                    steps {
-                        withCredentials([
-                            string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN'),
-                            string(credentialsId: 'record-key-buggy-cars-rating', variable: 'CYPRESS_RECORD_KEY')
-                        ]) {
-                            git url: "${REPO_URL}", branch: 'main', credentialsId: 'github-token'
-                            bat 'npm ci'
-                            bat "npx cypress run --record --key %CYPRESS_RECORD_KEY% --parallel"
-                        }
-                    }
-                }
-
-            } // end parallel
-        } // end stage 'Parallel Cypress Tests'
-
-        stage('Archive Artifacts') {
-            agent { label 'cypress1' } // cualquier nodo disponible
+        stage('Checkout') {
             steps {
-                echo 'Archiving Cypress videos and screenshots...'
-                archiveArtifacts artifacts: 'cypress/videos/**/*, cypress/screenshots/**/*', allowEmptyArchive: true
+                checkout scm
             }
         }
 
-    } // end stages
+        stage('Install dependencies') {
+            steps {
+                sh 'npm ci'
+            }
+        }
+
+        stage('Run Cypress Tests') {
+            steps {
+                sh 'npx cypress run --record --parallel'
+            }
+        }
+    }
 
     post {
+        always {
+            archiveArtifacts artifacts: 'cypress/videos/**, cypress/screenshots/**', allowEmptyArchive: true
+        }
         success {
-            echo 'Build successful! ✅'
+            echo 'Build successful ✅'
         }
         failure {
             echo 'Build failed ❌'
         }
     }
-
-} // end pipeline
+}
