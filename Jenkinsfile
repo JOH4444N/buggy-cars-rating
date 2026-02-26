@@ -2,46 +2,55 @@ pipeline {
     agent any
 
     environment {
-        CYPRESS_RECORD_KEY = credentials('record-key-buggy-cars-rating')
+        IMAGE_NAME = "johanqa/cypress-tests"
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
     }
 
     stages {
 
-        stage('Checkout SCM') {
+        stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Install dependencies') {
+        stage('Install Dependencies') {
             steps {
                 bat 'npm ci'
             }
         }
 
-        stage('Run Cypress in Docker') {
+        stage('Run Tests in Docker') {
             steps {
                 bat '''
                 docker run --rm ^
                   -v "%cd%:/e2e" ^
                   -w /e2e ^
-                  -e CYPRESS_RECORD_KEY ^
                   cypress/included:13.6.0 ^
-                  cypress run --record --config video=false,screenshotOnRunFailure=false
+                  cypress run
                 '''
             }
         }
-    }
 
-    post {
-        always {
-            echo 'Pipeline finished'
+        stage('Build Docker Image') {
+            steps {
+                bat "docker build -t %IMAGE_NAME%:%IMAGE_TAG% ."
+            }
         }
-        success {
-            echo 'Build SUCCESS ✅'
+
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    bat "docker login -u %USER% -p %PASS%"
+                    bat "docker push %IMAGE_NAME%:%IMAGE_TAG%"
+                }
+            }
         }
-        failure {
-            echo 'Build FAILED ❌'
+
+        stage('Approval for Production') {
+            steps {
+                input message: 'Deploy to Production?', ok: 'Deploy'
+            }
         }
     }
 }
