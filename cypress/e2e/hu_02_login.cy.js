@@ -3,8 +3,8 @@ describe('HU-02 — Inicio de sesión de usuario',()=>{
     let user
 
     before(()=>{
-        cy.fixture('loginValido').then((valor)=>{
-            user = valor
+        cy.fixture('loginValido').then((data)=>{
+            user = data
         })
     })
 
