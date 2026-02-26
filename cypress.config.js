@@ -5,7 +5,7 @@ module.exports = defineConfig({
   e2e: {
     baseUrl: 'https://buggy.justtestit.org/',
     screenshotOnRunFailure: true,
-    video: true,
+    video: false,
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },
