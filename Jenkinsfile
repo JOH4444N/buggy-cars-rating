@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "TU_USUARIO/buggy-cars-rating"
+        IMAGE_NAME = "JOH4444N/buggy-cars-rating"
         IMAGE_TAG = "${env.BUILD_NUMBER}-${env.GIT_COMMIT.take(7)}"
     }
 
