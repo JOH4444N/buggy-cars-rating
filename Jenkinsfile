@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "johanqa/cypress-tests"
-        IMAGE_TAG = "${env.BUILD_NUMBER}"
+        IMAGE_NAME = "TU_USUARIO/buggy-cars-rating"
+        IMAGE_TAG = "${env.BUILD_NUMBER}-${env.GIT_COMMIT.take(7)}"
     }
 
     stages {
@@ -20,7 +20,7 @@ pipeline {
             }
         }
 
-        stage('Run Tests in Docker') {
+        stage('Run Cypress Tests') {
             steps {
                 bat '''
                 docker run --rm ^
@@ -38,9 +38,9 @@ pipeline {
             }
         }
 
-        stage('Push to Docker Hub') {
+        stage('Push Image to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'joh4444n', passwordVariable: 'PASS')]) {
                     bat "docker login -u %USER% -p %PASS%"
                     bat "docker push %IMAGE_NAME%:%IMAGE_TAG%"
                 }
@@ -49,8 +49,17 @@ pipeline {
 
         stage('Approval for Production') {
             steps {
-                input message: 'Deploy to Production?', ok: 'Deploy'
+                input message: 'Deploy to Production?', ok: 'Approve'
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build and Delivery Successful'
+        }
+        failure {
+            echo 'Build Failed'
         }
     }
 }
