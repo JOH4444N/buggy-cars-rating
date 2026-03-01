@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'cypress/included:13.6.0'
-            args '-u root'
-        }
-    }
+    agent any
 
     environment {
         DOCKER_IMAGE = "joh4444n/buggy-cars-cypress"
@@ -20,21 +15,17 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Run Cypress Tests (Docker)') {
             steps {
-                sh 'npm ci'
-            }
-        }
-
-        stage('Run Cypress Tests') {
-            steps {
-                sh 'mkdir -p results'
-                sh 'npx cypress run --reporter junit --reporter-options "mochaFile=results/results.xml"'
-            }
-            post {
-                always {
-                    junit 'results/*.xml'
-                }
+                sh '''
+                docker run --rm \
+                  -v $PWD:/e2e \
+                  -w /e2e \
+                  cypress/included:13.6.0 \
+                  npx cypress run \
+                  --reporter junit \
+                  --reporter-options "mochaFile=results/results.xml"
+                '''
             }
         }
 
@@ -65,17 +56,23 @@ pipeline {
 
         stage('Deploy to Testing (Auto)') {
             steps {
-                sh "npx cypress run --config baseUrl=$TESTING_URL"
+                sh '''
+                docker run --rm \
+                  -v $PWD:/e2e \
+                  -w /e2e \
+                  cypress/included:13.6.0 \
+                  npx cypress run --config baseUrl=$TESTING_URL
+                '''
             }
         }
     }
 
     post {
-        failure {
-            echo "CD failed ❌"
-        }
         success {
             echo "CD completed automatically ✅"
+        }
+        failure {
+            echo "CD failed ❌"
         }
     }
 }
