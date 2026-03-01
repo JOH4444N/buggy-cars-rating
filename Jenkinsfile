@@ -2,8 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "tuusuario/buggy-cars-cypress"
-        VERSION = "${env.BUILD_NUMBER}"
+        DOCKER_IMAGE = "joh4444n/buggy-cars-cypress"
+        VERSION = "${BUILD_NUMBER}"
+        TESTING_URL = "https://buggy.justtestit.org/"
     }
 
     stages {
@@ -22,28 +23,25 @@ pipeline {
 
         stage('Run Cypress Tests') {
             steps {
-                sh 'npx cypress run'
+                sh 'npx cypress run --reporter junit --reporter-options "mochaFile=results/results.xml"'
             }
             post {
                 always {
-                    junit '**/results/*.xml'
+                    junit 'results/*.xml'
                 }
             }
         }
 
         stage('Build Docker Image') {
-            when {
-                branch 'main'
-            }
             steps {
-                sh "docker build -t $DOCKER_IMAGE:$VERSION ."
+                sh """
+                    docker build -t $DOCKER_IMAGE:$VERSION .
+                    docker tag $DOCKER_IMAGE:$VERSION $DOCKER_IMAGE:latest
+                """
             }
         }
 
         stage('Push Docker Image') {
-            when {
-                branch 'main'
-            }
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-creds',
@@ -53,27 +51,25 @@ pipeline {
                     sh """
                         echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
                         docker push $DOCKER_IMAGE:$VERSION
+                        docker push $DOCKER_IMAGE:latest
                     """
                 }
             }
         }
 
-        stage('Approval for Production') {
-            when {
-                branch 'main'
-            }
+        stage('Deploy to Testing (Auto)') {
             steps {
-                input message: "Deploy tests to Production environment?", ok: "Approve"
+                sh "npx cypress run --config baseUrl=$TESTING_URL"
             }
         }
+    }
 
-        stage('Run Against Production') {
-            when {
-                branch 'main'
-            }
-            steps {
-                sh 'npx cypress run --config baseUrl=https://produccion.com'
-            }
+    post {
+        failure {
+            echo "CD failed ❌"
+        }
+        success {
+            echo "CD completed automatically ✅"
         }
     }
 }
