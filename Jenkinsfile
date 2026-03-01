@@ -1,8 +1,13 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'cypress/included:13.6.0'
+            args '-u root'
+        }
+    }
 
     environment {
-        DOCKER_IMAGE = "joh4444n/buggy-cars-cypress"
+        DOCKER_IMAGE = "TU_USUARIO_DOCKERHUB/buggy-cars-cypress"
         VERSION = "${BUILD_NUMBER}"
         TESTING_URL = "https://buggy.justtestit.org/"
     }
@@ -23,6 +28,7 @@ pipeline {
 
         stage('Run Cypress Tests') {
             steps {
+                sh 'mkdir -p results'
                 sh 'npx cypress run --reporter junit --reporter-options "mochaFile=results/results.xml"'
             }
             post {
