@@ -2,9 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "joh4444n/buggy-cars-cypress"
-        VERSION = "${BUILD_NUMBER}"
-        TESTING_URL = "https://buggy.justtestit.org/"
+        IMAGE_NAME = "joh4444n/buggy-cars-rating"
+        IMAGE_TAG  = "${env.BUILD_NUMBER}-${env.GIT_COMMIT.take(7)}"
     }
 
     stages {
@@ -15,64 +14,64 @@ pipeline {
             }
         }
 
-        stage('Run Cypress Tests (Docker)') {
-            steps {
-                sh '''
-                docker run --rm \
-                  -v $PWD:/e2e \
-                  -w /e2e \
-                  cypress/included:13.6.0 \
-                  npx cypress run \
-                  --reporter junit \
-                  --reporter-options "mochaFile=results/results.xml"
-                '''
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 sh """
-                    docker build -t $DOCKER_IMAGE:$VERSION .
-                    docker tag $DOCKER_IMAGE:$VERSION $DOCKER_IMAGE:latest
+                    docker build -t $IMAGE_NAME:$IMAGE_TAG .
+                    docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest
                 """
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Run Cypress Tests (inside image)') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
+                sh """
+                    docker run --rm $IMAGE_NAME:$IMAGE_TAG
+                """
+            }
+        }
+
+        stage('Push Image to Docker Hub') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
                     sh """
                         echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                        docker push $DOCKER_IMAGE:$VERSION
-                        docker push $DOCKER_IMAGE:latest
+                        docker push $IMAGE_NAME:$IMAGE_TAG
+                        docker push $IMAGE_NAME:latest
                     """
                 }
             }
         }
 
-        stage('Deploy to Testing (Auto)') {
+        stage('Approval for Production') {
             steps {
-                sh '''
-                docker run --rm \
-                  -v $PWD:/e2e \
-                  -w /e2e \
-                  cypress/included:13.6.0 \
-                  npx cypress run --config baseUrl=$TESTING_URL
-                '''
+                input message: 'Deploy to Production?', ok: 'Approve'
+            }
+        }
+
+        stage('Deploy to Production') {
+            steps {
+                sh """
+                    docker stop buggy-cars || true
+                    docker rm buggy-cars || true
+                    docker run -d --name buggy-cars -p 8080:80 $IMAGE_NAME:latest
+                """
             }
         }
     }
 
     post {
         success {
-            echo "CD completed automatically ✅"
+            echo 'CD Pipeline Completed Successfully ✅'
         }
         failure {
-            echo "CD failed ❌"
+            echo 'CD Pipeline Failed ❌'
         }
     }
 }
