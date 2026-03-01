@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "joh4444n/buggy-cars-rating"
-        IMAGE_TAG = "${env.BUILD_NUMBER}-${env.GIT_COMMIT.take(7)}"
+        DOCKER_IMAGE = "tuusuario/buggy-cars-cypress"
+        VERSION = "${env.BUILD_NUMBER}"
     }
 
     stages {
@@ -14,42 +14,66 @@ pipeline {
             }
         }
 
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm ci'
+            }
+        }
+
+        stage('Run Cypress Tests') {
+            steps {
+                sh 'npx cypress run'
+            }
+            post {
+                always {
+                    junit '**/results/*.xml'
+                }
+            }
+        }
+
         stage('Build Docker Image') {
+            when {
+                branch 'main'
+            }
             steps {
-                sh "docker build -t $IMAGE_NAME:$IMAGE_TAG ."
+                sh "docker build -t $DOCKER_IMAGE:$VERSION ."
             }
         }
 
-        stage('Run Cypress Tests (inside image)') {
-            steps {
-                sh "docker run --rm $IMAGE_NAME:$IMAGE_TAG"
+        stage('Push Docker Image') {
+            when {
+                branch 'main'
             }
-        }
-
-        stage('Push Image to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh '''
-                    echo $PASS | docker login -u $USER --password-stdin
-                    docker push $IMAGE_NAME:$IMAGE_TAG
-                    '''
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh """
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        docker push $DOCKER_IMAGE:$VERSION
+                    """
                 }
             }
         }
 
         stage('Approval for Production') {
+            when {
+                branch 'main'
+            }
             steps {
-                input message: 'Deploy to Production?', ok: 'Approve'
+                input message: "Deploy tests to Production environment?", ok: "Approve"
             }
         }
-    }
 
-    post {
-        success {
-            echo 'Build and Delivery Successful'
-        }
-        failure {
-            echo 'Build Failed'
+        stage('Run Against Production') {
+            when {
+                branch 'main'
+            }
+            steps {
+                sh 'npx cypress run --config baseUrl=https://produccion.com'
+            }
         }
     }
 }
