@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        DOCKER_IMAGE = "TU_USUARIO_DOCKERHUB/buggy-cars-cypress"
+        DOCKER_IMAGE = "joh4444n/buggy-cars-cypress"
         VERSION = "${BUILD_NUMBER}"
         TESTING_URL = "https://buggy.justtestit.org/"
     }
