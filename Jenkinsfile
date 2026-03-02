@@ -2,76 +2,49 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "joh4444n/buggy-cars-rating"
-        IMAGE_TAG  = "${env.BUILD_NUMBER}-${env.GIT_COMMIT.take(7)}"
+        GIT_CREDENTIALS_ID = 'github-credentials' 
+        REPO_URL = 'https://github.com/JOH4444N/buggy-cars-rating.git'
     }
 
     stages {
 
-        stage('Checkout') {
+        stage('Install Dependencies') {
             steps {
-                checkout scm
+                bat 'npm install'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Run Tests & Generate Report') {
             steps {
-                sh """
-                    docker build -t $IMAGE_NAME:$IMAGE_TAG .
-                    docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest
-                """
+                bat 'npm run test:report'
             }
         }
 
-        stage('Run Cypress Tests (inside image)') {
+        stage('Publish Report to reports branch') {
             steps {
-                sh """
-                    docker run --rm $IMAGE_NAME:$IMAGE_TAG
-                """
-            }
-        }
+                withCredentials([usernamePassword(
+                    credentialsId: "${GIT_CREDENTIALS_ID}",
+                    usernameVariable: 'GIT_USER',
+                    passwordVariable: 'GIT_PASS'
+                )]) {
 
-        stage('Push Image to Docker Hub') {
-            steps {
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'dockerhub-creds',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )
-                ]) {
-                    sh """
-                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                        docker push $IMAGE_NAME:$IMAGE_TAG
-                        docker push $IMAGE_NAME:latest
-                    """
+                    bat '''
+                    git config user.email "jenkins@local"
+                    git config user.name "Jenkins"
+
+                    git checkout --orphan reports
+                    git rm -rf .
+                    git clean -fdx
+
+                    xcopy cypress\\reports\\index.html index.html*
+
+                    git add index.html
+                    git commit -m "Automated test report"
+
+                    git push --force https://%GIT_USER%:%GIT_PASS%@github.com/JOH4444N/buggy-cars-rating.git reports
+                    '''
                 }
             }
-        }
-
-        stage('Approval for Production') {
-            steps {
-                input message: 'Deploy to Production?', ok: 'Approve'
-            }
-        }
-
-        stage('Deploy to Production') {
-            steps {
-                sh """
-                    docker stop buggy-cars || true
-                    docker rm buggy-cars || true
-                    docker run -d --name buggy-cars -p 8080:80 $IMAGE_NAME:latest
-                """
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'CD Pipeline Completed Successfully ✅'
-        }
-        failure {
-            echo 'CD Pipeline Failed ❌'
         }
     }
 }
