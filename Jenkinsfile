@@ -1,47 +1,41 @@
 pipeline {
     agent any
 
-    environment {
-        GIT_CREDENTIALS_ID = 'github-credentials' 
-        REPO_URL = 'https://github.com/JOH4444N/buggy-cars-rating.git'
-    }
-
     stages {
 
         stage('Install Dependencies') {
             steps {
-                bat 'npm install'
+                sh 'npm install'
             }
         }
 
         stage('Run Tests & Generate Report') {
             steps {
-                bat 'npm run test:report'
+                sh 'npm run test:report'
             }
         }
 
         stage('Publish Report to reports branch') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: "${GIT_CREDENTIALS_ID}",
+                    credentialsId: 'github-credentials',
                     usernameVariable: 'GIT_USER',
                     passwordVariable: 'GIT_PASS'
                 )]) {
 
-                    bat '''
+                    sh '''
                     git config user.email "jenkins@local"
                     git config user.name "Jenkins"
 
-                    git checkout --orphan reports
-                    git rm -rf .
-                    git clean -fdx
+                    git checkout --orphan reports || true
+                    git rm -rf . || true
 
-                    xcopy cypress\\reports\\index.html index.html*
+                    cp cypress/reports/index.html index.html
 
                     git add index.html
-                    git commit -m "Automated test report"
+                    git commit -m "Automated test report" || true
 
-                    git push --force https://%GIT_USER%:%GIT_PASS%@github.com/JOH4444N/buggy-cars-rating.git reports
+                    git push --force https://${GIT_USER}:${GIT_PASS}@github.com/JOH444N/buggy-cars-rating.git reports
                     '''
                 }
             }
