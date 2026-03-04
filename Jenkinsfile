@@ -15,7 +15,7 @@ pipeline {
                     docker run --rm \
                       -v $WORKSPACE:/e2e \
                       -w /e2e \
-                      -e CYPRESS_baseUrl=https://buggy-cars-rating.herokuapp.com \
+                      -e CYPRESS_baseUrl=https://buggy.justtestit.org/ \
                       cypress/included:13.6.0 \
                       --headless \
                       --browser electron
