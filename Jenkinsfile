@@ -11,7 +11,15 @@ pipeline {
 
         stage('Run Tests & Generate Report') {
             steps {
-                sh 'npm run test:report'
+                sh '''
+                    docker run --rm \
+                      -v $WORKSPACE:/e2e \
+                      -w /e2e \
+                      -e CYPRESS_baseUrl=https://buggy-cars-rating.herokuapp.com \
+                      cypress/included:13.6.0 \
+                      --headless \
+                      --browser electron
+                '''
             }
         }
 
@@ -22,20 +30,21 @@ pipeline {
                     usernameVariable: 'GIT_USER',
                     passwordVariable: 'GIT_PASS'
                 )]) {
-
                     sh '''
-                    git config user.email "jenkins@local"
-                    git config user.name "Jenkins"
+                        cp cypress/reports/index.html /tmp/index.html
 
-                    git checkout --orphan reports || true
-                    git rm -rf . || true
+                        git config user.email "jenkins@local"
+                        git config user.name "Jenkins"
 
-                    cp cypress/reports/index.html index.html
+                        git checkout --orphan reports || git checkout reports
+                        git rm -rf . || true
 
-                    git add index.html
-                    git commit -m "Automated test report" || true
+                        cp /tmp/index.html index.html
 
-                    git push --force https://${GIT_USER}:${GIT_PASS}@github.com/JOH444N/buggy-cars-rating.git reports
+                        git add index.html
+                        git commit -m "Automated test report" || true
+
+                        git push --force https://${GIT_USER}:${GIT_PASS}@github.com/JOH444N/buggy-cars-rating.git reports
                     '''
                 }
             }
