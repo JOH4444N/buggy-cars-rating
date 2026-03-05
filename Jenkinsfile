@@ -12,13 +12,16 @@ pipeline {
         stage('Run Tests & Generate Report') {
             steps {
                 sh '''
+                    rm -rf cypress/reports
+                    mkdir -p cypress/reports
+
                     docker run --rm \
                       -v jenkins_home:/var/jenkins_home \
                       -w /var/jenkins_home/workspace/buggy-cars-rating \
                       -e CYPRESS_baseUrl=https://buggy.justtestit.org/ \
                       cypress/included:15.9.0 \
                       --headless \
-                      --browser chrome || true
+                      --browser electron || true
 
                     docker run --rm \
                       -v jenkins_home:/var/jenkins_home \
