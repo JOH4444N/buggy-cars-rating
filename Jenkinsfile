@@ -13,12 +13,12 @@ pipeline {
             steps {
                 sh '''
                     docker run --rm \
-                      -v $WORKSPACE:/e2e \
-                      -w /e2e \
+                      -v jenkins_home:/var/jenkins_home \
+                      -w /var/jenkins_home/workspace/buggy-cars-rating \
                       -e CYPRESS_baseUrl=https://buggy.justtestit.org/ \
                       cypress/included:15.9.0 \
                       --headless \
-                      --browser chorme
+                      --browser electron
                 '''
             }
         }
