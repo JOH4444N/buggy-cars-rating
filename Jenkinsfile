@@ -52,7 +52,7 @@ pipeline {
                         git add index.html
                         git commit -m "Automated test report" || true
 
-                        git push --force https://${GIT_USER}:${GIT_PASS}@github.com/JOH444N/buggy-cars-rating.git reports
+                        git push --force https://${GIT_USER}:${GIT_PASS}@github.com/JOH4444N/buggy-cars-rating.git reports
                     '''
                 }
             }
