@@ -5,12 +5,10 @@ pipeline {
         timeout(time: 30, unit: 'MINUTES')
     }
 
-    stages {
-
         stage('Install Dependencies') {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
-                    sh 'npm install'
+                    sh 'CYPRESS_INSTALL_BINARY=0 npm install'
                 }
             }
         }
