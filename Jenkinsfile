@@ -39,7 +39,7 @@ pipeline {
                     passwordVariable: 'GIT_PASS'
                 )]) {
                     sh '''
-                        cp cypress/reports/index.html /tmp/index.html
+                        cp -r cypress/reports /tmp/reports
 
                         git config user.email "jenkins@local"
                         git config user.name "Jenkins"
@@ -47,9 +47,9 @@ pipeline {
                         git checkout --orphan reports || git checkout reports
                         git rm -rf . || true
 
-                        cp /tmp/index.html index.html
+                        cp -r /tmp/reports/. .
 
-                        git add index.html
+                        git add .
                         git commit -m "Automated test report" || true
 
                         git push --force https://${GIT_USER}:${GIT_PASS}@github.com/JOH4444N/buggy-cars-rating.git reports
