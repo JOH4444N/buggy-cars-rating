@@ -18,7 +18,10 @@ pipeline {
                       -e CYPRESS_baseUrl=https://buggy.justtestit.org/ \
                       cypress/included:15.9.0 \
                       --headless \
-                      --browser chrome || true
+                      --browser chorme || true
+
+                    npm run report:merge
+                    npm run report:generate
                 '''
             }
         }
