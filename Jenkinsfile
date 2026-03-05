@@ -16,9 +16,9 @@ pipeline {
                       -v $WORKSPACE:/e2e \
                       -w /e2e \
                       -e CYPRESS_baseUrl=https://buggy.justtestit.org/ \
-                      cypress/included:13.6.0 \
+                      cypress/included:15.9.0 \
                       --headless \
-                      --browser electron
+                      --browser chorme
                 '''
             }
         }
