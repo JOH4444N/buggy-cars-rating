@@ -21,32 +21,55 @@ pipeline {
             }
         }
 
-        stage('Run Cypress Tests') {
+        stage('Run Cypress Tests Parallel') {
+
             steps {
                 script {
-                    try {
 
-                        sh '''
-                            rm -rf cypress/reports
-                            mkdir -p cypress/reports
+                    withCredentials([string(credentialsId: 'cypress_cloud', variable: 'CYPRESS_KEY')]) {
 
-                            docker run --rm \
-                              -v jenkins_home:/var/jenkins_home \
-                              -w ${WORKSPACE_PATH} \
-                              -e CYPRESS_baseUrl=${CYPRESS_BASE_URL} \
-                              cypress/included:15.9.0 \
-                              --headless \
-                              --browser electron \
-                              --reporter ${WORKSPACE_PATH}/node_modules/mochawesome \
-                              --reporter-options "reportDir=cypress/reports,overwrite=false,html=false,json=true"
-                        '''
+                        parallel(
 
-                    } catch (err) {
+                            "Runner 1": {
 
-                        echo "Algunos tests fallaron"
-                        currentBuild.result = 'FAILURE'
+                                sh """
+                                    docker run --rm \
+                                      -v jenkins_home:/var/jenkins_home \
+                                      -w ${WORKSPACE_PATH} \
+                                      -e CYPRESS_baseUrl=${CYPRESS_BASE_URL} \
+                                      cypress/included:15.9.0 \
+                                      --record \
+                                      --key ${CYPRESS_KEY} \
+                                      --parallel \
+                                      --ci-build-id ${BUILD_NUMBER} \
+                                      --headless \
+                                      --browser electron
+                                """
+
+                            },
+
+                            "Runner 2": {
+
+                                sh """
+                                    docker run --rm \
+                                      -v jenkins_home:/var/jenkins_home \
+                                      -w ${WORKSPACE_PATH} \
+                                      -e CYPRESS_baseUrl=${CYPRESS_BASE_URL} \
+                                      cypress/included:15.9.0 \
+                                      --record \
+                                      --key ${CYPRESS_KEY} \
+                                      --parallel \
+                                      --ci-build-id ${BUILD_NUMBER} \
+                                      --headless \
+                                      --browser electron
+                                """
+
+                            }
+
+                        )
 
                     }
+
                 }
             }
         }
