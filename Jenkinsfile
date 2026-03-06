@@ -1,49 +1,41 @@
 pipeline {
     agent any
 
-    options {
-        timeout(time: 30, unit: 'MINUTES')
-    }
-
     stages {
 
         stage('Install Dependencies') {
             steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    sh 'CYPRESS_INSTALL_BINARY=0 npm install'
-                }
+                sh 'CYPRESS_INSTALL_BINARY=0 npm install'
             }
         }
 
         stage('Run Tests & Generate Report') {
             steps {
-                timeout(time: 20, unit: 'MINUTES') {
-                    sh '''
-                        rm -rf cypress/reports
-                        mkdir -p cypress/reports
+                sh '''
+                    rm -rf cypress/reports
+                    mkdir -p cypress/reports
 
-                        docker run --rm \
-                          -v jenkins_home:/var/jenkins_home \
-                          busybox \
-                          sh -c "rm -rf /var/jenkins_home/workspace/buggy-cars-rating/cypress/reports && mkdir -p /var/jenkins_home/workspace/buggy-cars-rating/cypress/reports"
+                    docker run --rm \
+                      -v jenkins_home:/var/jenkins_home \
+                      busybox \
+                      sh -c "rm -rf /var/jenkins_home/workspace/buggy-cars-rating/cypress/reports && mkdir -p /var/jenkins_home/workspace/buggy-cars-rating/cypress/reports"
 
-                        docker run --rm \
-                          -v jenkins_home:/var/jenkins_home \
-                          -w /var/jenkins_home/workspace/buggy-cars-rating \
-                          -e CYPRESS_baseUrl=https://buggy.justtestit.org/ \
-                          cypress/included:15.9.0 \
-                          --headless \
-                          --browser electron || true
+                    docker run --rm \
+                      -v jenkins_home:/var/jenkins_home \
+                      -w /var/jenkins_home/workspace/buggy-cars-rating \
+                      -e CYPRESS_baseUrl=https://buggy.justtestit.org/ \
+                      cypress/included:15.9.0 \
+                      --headless \
+                      --browser electron || true
 
-                        docker run --rm \
-                          -v jenkins_home:/var/jenkins_home \
-                          busybox \
-                          chown -R 1000:1000 /var/jenkins_home/workspace/buggy-cars-rating/cypress/reports
+                    docker run --rm \
+                      -v jenkins_home:/var/jenkins_home \
+                      busybox \
+                      chown -R 1000:1000 /var/jenkins_home/workspace/buggy-cars-rating/cypress/reports
 
-                        npm run report:merge
-                        npm run report:generate
-                    '''
-                }
+                    npm run report:merge
+                    npm run report:generate
+                '''
             }
         }
 
