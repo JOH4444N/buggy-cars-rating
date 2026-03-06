@@ -1,0 +1,219 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 7,
+    "passes": 7,
+    "pending": 0,
+    "failures": 0,
+    "start": "2026-03-06T02:30:54.389Z",
+    "end": "2026-03-06T02:31:30.543Z",
+    "duration": 36154,
+    "testsRegistered": 7,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "ab437833-a57d-434f-afbe-2ba52a5ec509",
+      "title": "",
+      "fullFile": "cypress/e2e/hu_02_login.cy.js",
+      "file": "cypress/e2e/hu_02_login.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "af45b3f6-15a0-40b0-91c8-c5be0ee6a44e",
+          "title": "HU-02 — Inicio de sesión de usuario",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "TC-01 Iniciar sesión con login y password válidos",
+              "fullTitle": "HU-02 — Inicio de sesión de usuario TC-01 Iniciar sesión con login y password válidos",
+              "timedOut": null,
+              "duration": 12806,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.login(user.login, user.password);\ncy.get('.navbar').contains('Hi,').should('be.visible');",
+              "err": {},
+              "uuid": "1ea10d6a-71ff-4c9a-9132-ca647e1a35be",
+              "parentUUID": "af45b3f6-15a0-40b0-91c8-c5be0ee6a44e",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "TC-02 Intentar iniciar sesión sin completar el campo Login",
+              "fullTitle": "HU-02 — Inicio de sesión de usuario TC-02 Intentar iniciar sesión sin completar el campo Login",
+              "timedOut": null,
+              "duration": 3249,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.login('', 'Password456');\ncy.get('[name=\"login\"]').should('have.attr', 'required');\ncy.get('.navbar').contains('Hi,').should('not.exist');",
+              "err": {},
+              "uuid": "8313d4a4-0b1d-4359-b64c-8581864e9e63",
+              "parentUUID": "af45b3f6-15a0-40b0-91c8-c5be0ee6a44e",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "TC-03 Intentar iniciar sesión sin completar el campo Password",
+              "fullTitle": "HU-02 — Inicio de sesión de usuario TC-03 Intentar iniciar sesión sin completar el campo Password",
+              "timedOut": null,
+              "duration": 3484,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.login(\"username01\", \"\");\ncy.get('[name=\"password\"]').should('have.attr', 'required');\ncy.get('.navbar').contains('Hi,').should('not.exist');",
+              "err": {},
+              "uuid": "b275fce4-a26d-4212-bdb7-fa1923216dcc",
+              "parentUUID": "af45b3f6-15a0-40b0-91c8-c5be0ee6a44e",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "TC-04 Intentar iniciar sesión sin completar ningún campo",
+              "fullTitle": "HU-02 — Inicio de sesión de usuario TC-04 Intentar iniciar sesión sin completar ningún campo",
+              "timedOut": null,
+              "duration": 2106,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.login(\"\", \"\");\ncy.get('[name=\"login\"]').should('have.attr', 'required');\ncy.get('[name=\"password\"]').should('have.attr', 'required');\ncy.get('.navbar').contains('Hi,').should('not.exist');",
+              "err": {},
+              "uuid": "5e50b2f2-b821-4b80-bd09-b0d0620d7808",
+              "parentUUID": "af45b3f6-15a0-40b0-91c8-c5be0ee6a44e",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "TC-05 Iniciar sesión con login inexistente",
+              "fullTitle": "HU-02 — Inicio de sesión de usuario TC-05 Iniciar sesión con login inexistente",
+              "timedOut": null,
+              "duration": 4822,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.login(\"username0098\", \"Prueba123*\");\ncy.contains('Invalid username/password').should('be.visible');",
+              "err": {},
+              "uuid": "798304fd-3421-4680-9375-d127c80f54e1",
+              "parentUUID": "af45b3f6-15a0-40b0-91c8-c5be0ee6a44e",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "TC-06 Iniciar sesión con login registrado y password incorrecto",
+              "fullTitle": "HU-02 — Inicio de sesión de usuario TC-06 Iniciar sesión con login registrado y password incorrecto",
+              "timedOut": null,
+              "duration": 4601,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.login(user.login, \"Qwerty1*\");\ncy.contains('Invalid username/password').should('be.visible');",
+              "err": {},
+              "uuid": "ec30746c-6cb3-446c-b05e-26c78df92b50",
+              "parentUUID": "af45b3f6-15a0-40b0-91c8-c5be0ee6a44e",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "tcprueba",
+              "fullTitle": "HU-02 — Inicio de sesión de usuario tcprueba",
+              "timedOut": null,
+              "duration": 2037,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('[name=\"password\"]').should('be.visible').clear();",
+              "err": {},
+              "uuid": "32a68a46-7041-409d-a833-e31e018d90ab",
+              "parentUUID": "af45b3f6-15a0-40b0-91c8-c5be0ee6a44e",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "1ea10d6a-71ff-4c9a-9132-ca647e1a35be",
+            "8313d4a4-0b1d-4359-b64c-8581864e9e63",
+            "b275fce4-a26d-4212-bdb7-fa1923216dcc",
+            "5e50b2f2-b821-4b80-bd09-b0d0620d7808",
+            "798304fd-3421-4680-9375-d127c80f54e1",
+            "ec30746c-6cb3-446c-b05e-26c78df92b50",
+            "32a68a46-7041-409d-a833-e31e018d90ab"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 33105,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.4"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true
+      },
+      "version": "6.3.2"
+    }
+  }
+}
