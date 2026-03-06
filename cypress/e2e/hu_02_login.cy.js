@@ -69,4 +69,10 @@ describe('HU-02 — Inicio de sesión de usuario',()=>{
         cy.contains('Invalid username/password')
         .should('be.visible')
     } )
+
+    it('tcprueba',()=>{
+        cy.get('[name="password"]')
+            .should('be.visible')
+            .clear()
+    })
 })
