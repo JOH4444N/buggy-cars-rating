@@ -12,6 +12,7 @@ pipeline {
         stage('Run Tests & Generate Report') {
             steps {
                 sh '''
+                    rm -f mochawesome*.json report.json
                     rm -rf cypress/reports
                     mkdir -p cypress/reports
 
@@ -56,8 +57,8 @@ pipeline {
                         echo "cypress/screenshots/" >> .gitignore
                         echo "cypress/videos/" >> .gitignore
 
-                        git add index.html assets/ .gitignore
-                        git commit -m "Automated test report" || true
+                        git add -f index.html assets/ .gitignore
+                        git commit -m "Automated test report $(date)" || true
 
                         git push --force https://${GIT_USER}:${GIT_PASS}@github.com/JOH4444N/buggy-cars-rating.git reports
                     '''
