@@ -21,9 +21,7 @@ pipeline {
                       -e CYPRESS_baseUrl=https://buggy.justtestit.org/ \
                       cypress/included:15.9.0 \
                       --headless \
-                      --browser electron \
-                      --reporter mochawesome \
-                      --reporter-options "reportDir=cypress/reports,overwrite=false,html=false,json=true" || true
+                      --browser electron || true
 
                     docker run --rm \
                       -v jenkins_home:/var/jenkins_home \
