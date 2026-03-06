@@ -53,11 +53,12 @@ pipeline {
                         git checkout --orphan reports || git checkout reports
                         git rm -rf . || true
 
-                        cp -r /tmp/reports/. .
+                        cp -r /tmp/reports/index.html .
+                        cp -r /tmp/reports/assets .
 
                         echo "node_modules/" > .gitignore
-                        echo "cypress/screenshots/" >> .gitignore
-                        echo "cypress/videos/" >> .gitignore
+                        echo "cypress/" >> .gitignore
+                        echo "reports/" >> .gitignore
 
                         git add -A
                         git commit -m "Automated test report $(date)" || true
