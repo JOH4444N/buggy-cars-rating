@@ -21,32 +21,37 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
+        stage('Run Cypress Tests') {
             steps {
-                sh '''
-                    rm -rf cypress/reports
-                    mkdir -p cypress/reports
+                script {
+                    try {
 
-                    docker run --rm \
-                      -v jenkins_home:/var/jenkins_home \
-                      -w ${WORKSPACE_PATH} \
-                      -e CYPRESS_baseUrl=${CYPRESS_BASE_URL} \
-                      cypress/included:15.9.0 \
-                      --headless \
-                      --browser electron \
-                      --reporter ${WORKSPACE_PATH}/node_modules/mochawesome \
-                      --reporter-options "reportDir=cypress/reports,overwrite=false,html=false,json=true"
-                    echo $? > /tmp/cypress_exit_code
+                        sh '''
+                            rm -rf cypress/reports
+                            mkdir -p cypress/reports
 
-                    docker run --rm \
-                      -v jenkins_home:/var/jenkins_home \
-                      busybox \
-                      chown -R 1000:1000 ${WORKSPACE_PATH}/cypress/reports
-                '''
+                            docker run --rm \
+                              -v jenkins_home:/var/jenkins_home \
+                              -w ${WORKSPACE_PATH} \
+                              -e CYPRESS_baseUrl=${CYPRESS_BASE_URL} \
+                              cypress/included:15.9.0 \
+                              --headless \
+                              --browser electron \
+                              --reporter ${WORKSPACE_PATH}/node_modules/mochawesome \
+                              --reporter-options "reportDir=cypress/reports,overwrite=false,html=false,json=true"
+                        '''
+
+                    } catch (err) {
+
+                        echo "Algunos tests fallaron"
+                        currentBuild.result = 'FAILURE'
+
+                    }
+                }
             }
         }
 
-        stage('Generate Report') {
+        stage('Generate Mochawesome Report') {
             steps {
                 sh '''
                     npm run report:merge
@@ -55,7 +60,7 @@ pipeline {
             }
         }
 
-        stage('Publish Report') {
+        stage('Publish Report to GitHub Pages') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'github-credentials',
@@ -82,11 +87,9 @@ pipeline {
                         echo "reports/" >> .gitignore
 
                         git add -A
-                        git commit -m "Report - Build #${BUILD_NUMBER} - $(date '+%Y-%m-%d %H:%M')" || true
+                        git commit -m "Test Report - Build #${BUILD_NUMBER}" || true
 
                         git push --force https://${GIT_USER}:${GIT_PASS}@${REPO_URL#https://} reports
-
-                        exit $(cat /tmp/cypress_exit_code)
                     '''
                 }
             }
@@ -94,14 +97,23 @@ pipeline {
     }
 
     post {
-        success {
-            echo "✅ Pipeline exitoso - Todos los tests pasaron"
-        }
-        failure {
-            echo "❌ Pipeline fallido - Revisar tests o logs"
-        }
+
         always {
-            echo "🔗 Reporte: https://joh4444n.github.io/buggy-cars-rating/"
+
+            archiveArtifacts artifacts: 'cypress/screenshots/**', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'cypress/videos/**', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'cypress/reports/**', allowEmptyArchive: true
+
+            echo "🔗 Reporte disponible en:"
+            echo "https://joh4444n.github.io/buggy-cars-rating/"
+        }
+
+        success {
+            echo "✅ Todos los tests pasaron"
+        }
+
+        failure {
+            echo "❌ Algunos tests fallaron - revisar reporte"
         }
     }
 }
