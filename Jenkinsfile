@@ -1,43 +1,60 @@
 pipeline {
     agent any
 
+    options {
+        timeout(time: 60, unit: 'MINUTES')
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+
+    environment {
+        REPO_URL = 'https://github.com/JOH4444N/buggy-cars-rating.git'
+        CYPRESS_BASE_URL = 'https://buggy.justtestit.org/'
+        WORKSPACE_PATH = '/var/jenkins_home/workspace/buggy-cars-rating'
+    }
+
     stages {
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                sh 'CYPRESS_INSTALL_BINARY=0 npm install'
             }
         }
 
-        stage('Run Tests & Generate Report') {
+        stage('Run Tests') {
             steps {
                 sh '''
-                    rm -f mochawesome*.json report.json
                     rm -rf cypress/reports
                     mkdir -p cypress/reports
 
                     docker run --rm \
                       -v jenkins_home:/var/jenkins_home \
-                      -w /var/jenkins_home/workspace/buggy-cars-rating \
-                      -e CYPRESS_baseUrl=https://buggy.justtestit.org/ \
+                      -w ${WORKSPACE_PATH} \
+                      -e CYPRESS_baseUrl=${CYPRESS_BASE_URL} \
                       cypress/included:15.9.0 \
                       --headless \
                       --browser electron \
-                      --reporter /var/jenkins_home/workspace/buggy-cars-rating/node_modules/mochawesome \
+                      --reporter ${WORKSPACE_PATH}/node_modules/mochawesome \
                       --reporter-options "reportDir=cypress/reports,overwrite=false,html=false,json=true" || true
 
                     docker run --rm \
                       -v jenkins_home:/var/jenkins_home \
                       busybox \
-                      chown -R 1000:1000 /var/jenkins_home/workspace/buggy-cars-rating/cypress/reports
+                      chown -R 1000:1000 ${WORKSPACE_PATH}/cypress/reports
+                '''
+            }
+        }
 
+        stage('Generate Report') {
+            steps {
+                sh '''
                     npm run report:merge
                     npm run report:generate
                 '''
             }
         }
 
-        stage('Publish Report to reports branch') {
+        stage('Publish Report') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'github-credentials',
@@ -54,22 +71,34 @@ pipeline {
                         git checkout --orphan reports || git checkout reports
                         git rm -rf . || true
 
-                        cp -r /tmp/reports/index.html .
+                        cp /tmp/reports/index.html .
                         cp -r /tmp/reports/assets .
 
-                        echo "<!-- $(date) -->" >> index.html
+                        echo "<!-- Generated: $(date) | Build: ${BUILD_NUMBER} -->" >> index.html
 
                         echo "node_modules/" > .gitignore
                         echo "cypress/" >> .gitignore
                         echo "reports/" >> .gitignore
 
                         git add -A
-                        git commit -m "Automated test report $(date)" || true
+                        git commit -m "Report - Build #${BUILD_NUMBER} - $(date '+%Y-%m-%d %H:%M')" || true
 
-                        git push --force https://${GIT_USER}:${GIT_PASS}@github.com/JOH4444N/buggy-cars-rating.git reports
+                        git push --force https://${GIT_USER}:${GIT_PASS}@${REPO_URL#https://} reports
                     '''
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Pipeline exitoso - Reporte publicado en GitHub Pages"
+        }
+        failure {
+            echo "❌ Pipeline fallido - Revisar logs"
+        }
+        always {
+            echo "🔗 Reporte: https://joh4444n.github.io/buggy-cars-rating/"
         }
     }
 }

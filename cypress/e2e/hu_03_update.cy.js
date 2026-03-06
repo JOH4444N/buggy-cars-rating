@@ -19,4 +19,8 @@ describe('HU-03 — Actualizar perfil',()=>{
     it('PRUEBA 2',()=>{
         cy.login("username01","")
     })
+
+    it('PRUEBA 3',()=>{
+        cy.login("username01","")
+    })
 })
