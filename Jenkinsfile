@@ -21,55 +21,71 @@ pipeline {
             }
         }
 
-        stage('Run Cypress Tests Parallel') {
-
+        stage('Run Cypress Tests') {
             steps {
                 script {
+                    try {
 
-                    withCredentials([string(credentialsId: 'cypress_cloud', variable: 'CYPRESS_KEY')]) {
+                        withCredentials([string(credentialsId: 'cypress_cloud', variable: 'CYPRESS_KEY')]) {
 
-                        parallel(
+                            sh """
+                                rm -rf cypress/reports
+                                mkdir -p cypress/reports
+                            """
 
-                            "Runner 1": {
+                            parallel(
 
-                                sh """
-                                    docker run --rm \
-                                      -v jenkins_home:/var/jenkins_home \
-                                      -w ${WORKSPACE_PATH} \
-                                      -e CYPRESS_baseUrl=${CYPRESS_BASE_URL} \
-                                      cypress/included:15.9.0 \
-                                      --record \
-                                      --key ${CYPRESS_KEY} \
-                                      --parallel \
-                                      --ci-build-id ${BUILD_NUMBER} \
-                                      --headless \
-                                      --browser electron
-                                """
+                                "Runner 1": {
+                                    sh """
+                                        docker run --rm \
+                                          -v jenkins_home:/var/jenkins_home \
+                                          -w ${WORKSPACE_PATH} \
+                                          -e CYPRESS_baseUrl=${CYPRESS_BASE_URL} \
+                                          cypress/included:15.9.0 \
+                                          --record \
+                                          --key ${CYPRESS_KEY} \
+                                          --parallel \
+                                          --ci-build-id ${BUILD_NUMBER} \
+                                          --headless \
+                                          --browser electron \
+                                          --reporter ${WORKSPACE_PATH}/node_modules/mochawesome \
+                                          --reporter-options "reportDir=cypress/reports,overwrite=false,html=false,json=true"
+                                    """
+                                },
 
-                            },
+                                "Runner 2": {
+                                    sh """
+                                        docker run --rm \
+                                          -v jenkins_home:/var/jenkins_home \
+                                          -w ${WORKSPACE_PATH} \
+                                          -e CYPRESS_baseUrl=${CYPRESS_BASE_URL} \
+                                          cypress/included:15.9.0 \
+                                          --record \
+                                          --key ${CYPRESS_KEY} \
+                                          --parallel \
+                                          --ci-build-id ${BUILD_NUMBER} \
+                                          --headless \
+                                          --browser electron \
+                                          --reporter ${WORKSPACE_PATH}/node_modules/mochawesome \
+                                          --reporter-options "reportDir=cypress/reports,overwrite=false,html=false,json=true"
+                                    """
+                                }
 
-                            "Runner 2": {
+                            )
 
-                                sh """
-                                    docker run --rm \
-                                      -v jenkins_home:/var/jenkins_home \
-                                      -w ${WORKSPACE_PATH} \
-                                      -e CYPRESS_baseUrl=${CYPRESS_BASE_URL} \
-                                      cypress/included:15.9.0 \
-                                      --record \
-                                      --key ${CYPRESS_KEY} \
-                                      --parallel \
-                                      --ci-build-id ${BUILD_NUMBER} \
-                                      --headless \
-                                      --browser electron
-                                """
+                        }
 
-                            }
-
-                        )
-
+                    } catch (err) {
+                        echo "Algunos tests fallaron"
+                        currentBuild.result = 'FAILURE'
                     }
 
+                    sh """
+                        docker run --rm \
+                          -v jenkins_home:/var/jenkins_home \
+                          busybox \
+                          chown -R 1000:1000 ${WORKSPACE_PATH}/cypress/reports
+                    """
                 }
             }
         }
@@ -122,13 +138,11 @@ pipeline {
     post {
 
         always {
-
             archiveArtifacts artifacts: 'cypress/screenshots/**', allowEmptyArchive: true
             archiveArtifacts artifacts: 'cypress/videos/**', allowEmptyArchive: true
             archiveArtifacts artifacts: 'cypress/reports/**', allowEmptyArchive: true
 
-            echo "🔗 Reporte disponible en:"
-            echo "https://joh4444n.github.io/buggy-cars-rating/"
+            echo "🔗 Reporte GitHub Pages: https://joh4444n.github.io/buggy-cars-rating/"
         }
 
         success {
