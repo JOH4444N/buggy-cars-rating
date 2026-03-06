@@ -56,6 +56,8 @@ pipeline {
                         cp -r /tmp/reports/index.html .
                         cp -r /tmp/reports/assets .
 
+                        echo "<!-- $(date) -->" >> index.html
+
                         echo "node_modules/" > .gitignore
                         echo "cypress/" >> .gitignore
                         echo "reports/" >> .gitignore
