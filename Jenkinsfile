@@ -59,7 +59,7 @@ pipeline {
                         echo "cypress/screenshots/" >> .gitignore
                         echo "cypress/videos/" >> .gitignore
 
-                        git add -f index.html assets/ .gitignore
+                        git add -A
                         git commit -m "Automated test report $(date)" || true
 
                         git push --force https://${GIT_USER}:${GIT_PASS}@github.com/JOH4444N/buggy-cars-rating.git reports
