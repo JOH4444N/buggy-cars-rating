@@ -45,6 +45,7 @@ pipeline {
                     passwordVariable: 'GIT_PASS'
                 )]) {
                     sh '''
+                        rm -rf /tmp/reports
                         cp -r cypress/reports /tmp/reports
 
                         git config user.email "jenkins@local"
