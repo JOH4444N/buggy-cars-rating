@@ -1,5 +1,5 @@
 import RegisterPage from "../support/page/RegisterPage" 
-describe('Validación HU-01 — Registro de usuario',()=>{
+describe('HU-01 — Registro de usuario',()=>{
     let user
 
     before(()=>{

@@ -1,5 +1,5 @@
 
-describe('HU-03 -prueba',()=>{
+describe('HU-03 — Actualizar perfil',()=>{
     let user
 
     before(()=>{
