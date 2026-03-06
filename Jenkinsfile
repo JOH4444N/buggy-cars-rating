@@ -35,7 +35,8 @@ pipeline {
                       --headless \
                       --browser electron \
                       --reporter ${WORKSPACE_PATH}/node_modules/mochawesome \
-                      --reporter-options "reportDir=cypress/reports,overwrite=false,html=false,json=true" || true
+                      --reporter-options "reportDir=cypress/reports,overwrite=false,html=false,json=true"
+                    echo $? > /tmp/cypress_exit_code
 
                     docker run --rm \
                       -v jenkins_home:/var/jenkins_home \
@@ -84,6 +85,8 @@ pipeline {
                         git commit -m "Report - Build #${BUILD_NUMBER} - $(date '+%Y-%m-%d %H:%M')" || true
 
                         git push --force https://${GIT_USER}:${GIT_PASS}@${REPO_URL#https://} reports
+
+                        exit $(cat /tmp/cypress_exit_code)
                     '''
                 }
             }
@@ -92,10 +95,10 @@ pipeline {
 
     post {
         success {
-            echo "✅ Pipeline exitoso - Reporte publicado en GitHub Pages"
+            echo "✅ Pipeline exitoso - Todos los tests pasaron"
         }
         failure {
-            echo "❌ Pipeline fallido - Revisar logs"
+            echo "❌ Pipeline fallido - Revisar tests o logs"
         }
         always {
             echo "🔗 Reporte: https://joh4444n.github.io/buggy-cars-rating/"
