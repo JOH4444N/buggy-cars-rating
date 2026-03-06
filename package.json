@@ -6,7 +6,7 @@
 "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "cy:run": "cypress run",
-    "report:merge": "mochawesome-merge \"mochawesome*.json\" > cypress/reports/report.json",
+    "report:merge": "mochawesome-merge \"cypress/reports/mochawesome*.json\" > cypress/reports/report.json",
     "report:generate": "marge cypress/reports/report.json -f index -o cypress/reports",
     "test:report": "npm run cy:run && npm run report:merge && npm run report:generate"
 },
