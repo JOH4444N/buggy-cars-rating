@@ -7,7 +7,6 @@ module.exports = defineConfig({
     baseUrl: 'https://buggy.justtestit.org/',
     screenshotOnRunFailure: true,
     video: false,
-    reporter: "mochawesome",
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },
