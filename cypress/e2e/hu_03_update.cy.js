@@ -21,6 +21,9 @@ describe('HU-03 — Actualizar perfil',()=>{
     })
 
     it('PRUEBA 3',()=>{
-        cy.login("username01","")
-    })
+        cy.login(user.login,"Qwerty1*")
+
+        cy.contains('Invalid username/password')
+        .should('not.be.visible')
+    } )
 })
