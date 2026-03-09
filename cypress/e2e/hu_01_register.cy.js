@@ -44,7 +44,6 @@ describe('HU-01 — Registro de usuario',()=>{
         cy.get('.result')
         .should('be.visible')
         .and('contain','Registration is successful')
-        cy.screenshot()
     })
 
     const datosFormulario = {
@@ -110,7 +109,6 @@ describe('HU-01 — Registro de usuario',()=>{
         cy.get('.result')
         .should('be.visible')
         .and('contain','size')
-        cy.screenshot()
     })
 
     it('@ui TC-08 - Registrar usuario con contraseña de 8 caracteres sin letra mayúscula',()=>{
@@ -125,7 +123,6 @@ describe('HU-01 — Registro de usuario',()=>{
         cy.get('.result')
         .should('be.visible')
         .and('contain','Password must have uppercase characters')
-        cy.screenshot()
     })
 
     it('@ui TC-09 - Registrar usuario con contraseña de 8 caracteres sin número',()=>{
@@ -140,7 +137,6 @@ describe('HU-01 — Registro de usuario',()=>{
         cy.get('.result')
         .should('be.visible')
         .and('contain','Password must have numeric characters')
-        cy.screenshot()
     })
 
     it('@ui TC-10 - Registrar usuario con contraseña de 8 caracteres sin simbolo',()=>{
@@ -155,7 +151,6 @@ describe('HU-01 — Registro de usuario',()=>{
         cy.get('.result')
         .should('be.visible')
         .and('contain','Password must have symbol characters')
-        cy.screenshot()
     })
 
     it('@ui TC-11 - Registrar un usuario con Password y Confirm Password diferentes',()=>{
@@ -168,7 +163,6 @@ describe('HU-01 — Registro de usuario',()=>{
         cy.get('.alert')
         .should('contain','Passwords do not match')
         .and('be.visible')
-        cy.screenshot()
     })
 
     it('@integration TC-12 - Registrar un usuario con Login previamente registrado',()=>{
