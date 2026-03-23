@@ -3,6 +3,11 @@ const { defineConfig } = require("cypress");
 module.exports = defineConfig({
   projectId: 'tyngys',
 
+  retries: {
+    runMode: 1,   
+    openMode: 1   
+  },
+
   reporter: "mochawesome",
   reporterOptions: {
     reportDir: "cypress/reports",

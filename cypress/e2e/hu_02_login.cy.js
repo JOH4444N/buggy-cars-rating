@@ -19,20 +19,18 @@ describe('HU-02 — Inicio de sesión de usuario',()=>{
         cy.login(user.login, user.password)
 
         cy.wait('@loginUser')
-        .then((interception) => {
+            .then((interception) => {
+                expect(interception.request.method).to.eq('POST')
 
-            expect(interception.request.method).to.eq('POST')
+                expect(interception.request.body)
+                    .to.contain(`username=${user.login}`)
 
-            expect(interception.request.body)
-                .to.contain(`username=${user.login}`)
-
-            expect(interception.response.statusCode).to.eq(200)
-
-        })
+                expect(interception.response.statusCode).to.eq(200)
+            })
 
         cy.get('.navbar')
-        .contains('Hi,')
-        .should('be.visible')
+            .contains('Hi,')
+            .should('be.visible')
 
     })
 
@@ -40,36 +38,36 @@ describe('HU-02 — Inicio de sesión de usuario',()=>{
         cy.login('','Password456')
 
         cy.get('[name="login"]')
-        .should('have.attr','required')
+            .should('have.attr','required')
 
         cy.get('.navbar')
-        .contains('Hi,')
-        .should('not.exist')
+            .contains('Hi,')
+            .should('not.exist')
     })
 
     it('@ui TC-03 Intentar iniciar sesión sin completar el campo Password',()=>{
         cy.login("username01","")
 
         cy.get('[name="password"]')
-        .should('have.attr','required')
+            .should('have.attr','required')
 
         cy.get('.navbar')
-        .contains('Hi,')
-        .should('not.exist')
+            .contains('Hi,')
+            .should('not.exist')
     })
 
     it('@ui TC-04 Intentar iniciar sesión sin completar ningún campo',()=>{
         cy.login("","")
 
         cy.get('[name="login"]')
-        .should('have.attr','required')
+            .should('have.attr','required')
 
         cy.get('[name="password"]')
-        .should('have.attr','required')
+            .should('have.attr','required')
 
         cy.get('.navbar')
-        .contains('Hi,')
-        .should('not.exist')
+            .contains('Hi,')
+            .should('not.exist')
     })
 
     it('@integration TC-05 Iniciar sesión con login inexistente', () => {
@@ -79,16 +77,14 @@ describe('HU-02 — Inicio de sesión de usuario',()=>{
         cy.login("username0098", "Prueba123*")
 
         cy.wait('@loginFail')
-        .then((interception) => {
+            .then((interception) => {
+                expect(interception.request.method).to.eq('POST')
 
-            expect(interception.request.method).to.eq('POST')
+                expect(interception.request.body)
+                    .to.contain('username=username0098')
 
-            expect(interception.request.body)
-                .to.contain('username=username0098')
-
-            expect(interception.response.statusCode).to.eq(401)
-
-        })
+                expect(interception.response.statusCode).to.eq(401)
+            })
 
         cy.contains('Invalid username/password')
         .should('be.visible')
@@ -96,25 +92,21 @@ describe('HU-02 — Inicio de sesión de usuario',()=>{
     })
 
     it('@integration TC-06 Iniciar sesión con login registrado y password incorrecto', () => {
-
         cy.intercept('POST', '**/prod/oauth/token').as('loginFail')
 
         cy.login(user.login, "Qwerty1*")
 
         cy.wait('@loginFail')
-        .then((interception) => {
+            .then((interception) => {
+                expect(interception.request.method).to.eq('POST')
 
-            expect(interception.request.method).to.eq('POST')
+                expect(interception.request.body)
+                    .to.contain(`username=${user.login}`)
 
-            expect(interception.request.body)
-                .to.contain(`username=${user.login}`)
-
-            expect(interception.response.statusCode).to.eq(401)
-
-        })
+                expect(interception.response.statusCode).to.eq(401)
+            })
 
         cy.contains('Invalid username/password')
-        .should('be.visible')
-
+            .should('be.visible')
     })
 })

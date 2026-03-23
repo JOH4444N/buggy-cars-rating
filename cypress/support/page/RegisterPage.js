@@ -9,30 +9,57 @@ class RegisterPage{
     }
 
     completarFormulario(user={}){
-        if(user.login)
-            this.elements.loginInput().should('be.visible').type(user.login)
-        if(user.firstName)
-            this.elements.firstNameInput().should('be.visible').type(user.firstName)
-        if(user.lastName)
-            this.elements.lastNameInput().should('be.visible').type(user.lastName)
-        if(user.password)
-            this.elements.passwordInput().should('be.visible').type(user.password)
-        if(user.confirmPassword)
-            this.elements.confirmPasswordInput().should('be.visible').type(user.confirmPassword)
+        if(user.login){
+            this.elements.loginInput()
+                .should('be.visible')
+                .clear()
+                .type(user.login)
+        }
+
+        if(user.firstName){
+            this.elements.firstNameInput()
+                .clear()
+                .should('be.visible')
+                .type(user.firstName)
+        }
+
+        if(user.lastName){
+            this.elements.lastNameInput()
+                .should('be.visible')
+                .clear()
+                .type(user.lastName)
+        }
+
+        if(user.password){
+            this.elements.passwordInput()
+                .should('be.visible')
+                .clear()
+                .type(user.password)
+        }
+
+        if(user.confirmPassword){
+            this.elements.confirmPasswordInput()
+                .should('be.visible')
+                .clear()
+                .type(user.confirmPassword)
+        }
     }
 
     enviarRegistro(){
-        this.elements.registerButton().should('be.enabled').click()
+        this.elements.registerButton()
+            .should('be.enabled')
+            .click()
     }
 
     buttonDisabled(){
-        this.elements.registerButton().should('be.disabled')
+        this.elements.registerButton()
+            .should('be.disabled')
     }
 
     screenshotButtonDisabled() {
         this.elements.registerButton()
-        .should('be.disabled')
-        .screenshot()
+            .should('be.disabled')
+            .screenshot()
     }
 }
 export default new RegisterPage()

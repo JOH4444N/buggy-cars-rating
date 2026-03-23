@@ -1,9 +1,10 @@
 import RegisterPage from "../support/page/RegisterPage" 
+
 describe('HU-01 — Registro de usuario',()=>{
     let user
 
     before(()=>{
-        cy.fixture('usuarioRegistrado').then((data)=>{
+        cy.fixture('userForRegister').then((data)=>{
             user=data
         }) 
     })
@@ -12,9 +13,9 @@ describe('HU-01 — Registro de usuario',()=>{
         cy.visit('/')
 
         cy.get('.btn')
-        .contains('Register')
-        .should('be.visible')
-        .click()
+            .contains('Register')
+            .should('be.visible')
+            .click()
     })
 
     it('@integration TC-01 - Registrar un nuevo usuario con datos válidos',()=>{
@@ -42,8 +43,8 @@ describe('HU-01 — Registro de usuario',()=>{
         })
 
         cy.get('.result')
-        .should('be.visible')
-        .and('contain','Registration is successful')
+            .should('be.visible')
+            .and('contain','Registration is successful')
     })
 
     const datosFormulario = {
@@ -59,6 +60,7 @@ describe('HU-01 — Registro de usuario',()=>{
             ...datosFormulario,
             login: ''
         })
+
         RegisterPage.buttonDisabled()
         RegisterPage.screenshotButtonDisabled()
     })
@@ -68,6 +70,7 @@ describe('HU-01 — Registro de usuario',()=>{
             ...datosFormulario,
             firstName: ''
         })
+
         RegisterPage.buttonDisabled()
         RegisterPage.screenshotButtonDisabled()
     })
@@ -77,6 +80,7 @@ describe('HU-01 — Registro de usuario',()=>{
             ...datosFormulario,
             lastName: ''
         })
+
         RegisterPage.buttonDisabled()
         RegisterPage.screenshotButtonDisabled()
     })
@@ -86,6 +90,7 @@ describe('HU-01 — Registro de usuario',()=>{
             ...datosFormulario,
             password: ''
         })
+
         RegisterPage.buttonDisabled()
         RegisterPage.screenshotButtonDisabled()
     })
@@ -95,6 +100,7 @@ describe('HU-01 — Registro de usuario',()=>{
             ...datosFormulario,
             confirmPassword: ''
         })
+
         RegisterPage.buttonDisabled()
         RegisterPage.screenshotButtonDisabled()
     })
@@ -105,10 +111,11 @@ describe('HU-01 — Registro de usuario',()=>{
             password: 'Ab01*',
             confirmPassword: 'Ab01*'
         })
+
         RegisterPage.enviarRegistro()
         cy.get('.result')
-        .should('be.visible')
-        .and('contain','size')
+            .should('be.visible')
+            .and('contain','size')
     })
 
     it('@ui TC-08 - Registrar usuario con contraseña de 8 caracteres sin letra mayúscula',()=>{
@@ -121,8 +128,8 @@ describe('HU-01 — Registro de usuario',()=>{
         RegisterPage.enviarRegistro()
 
         cy.get('.result')
-        .should('be.visible')
-        .and('contain','Password must have uppercase characters')
+            .should('be.visible')
+            .and('contain','Password must have uppercase characters')
     })
 
     it('@ui TC-09 - Registrar usuario con contraseña de 8 caracteres sin número',()=>{
@@ -135,8 +142,8 @@ describe('HU-01 — Registro de usuario',()=>{
         RegisterPage.enviarRegistro()
 
         cy.get('.result')
-        .should('be.visible')
-        .and('contain','Password must have numeric characters')
+            .should('be.visible')
+            .and('contain','Password must have numeric characters')
     })
 
     it('@ui TC-10 - Registrar usuario con contraseña de 8 caracteres sin simbolo',()=>{
@@ -149,8 +156,8 @@ describe('HU-01 — Registro de usuario',()=>{
         RegisterPage.enviarRegistro()
 
         cy.get('.result')
-        .should('be.visible')
-        .and('contain','Password must have symbol characters')
+            .should('be.visible')
+            .and('contain','Password must have symbol characters')
     })
 
     it('@ui TC-11 - Registrar un usuario con Password y Confirm Password diferentes',()=>{
@@ -161,8 +168,8 @@ describe('HU-01 — Registro de usuario',()=>{
         })
 
         cy.get('.alert')
-        .should('contain','Passwords do not match')
-        .and('be.visible')
+            .should('contain','Passwords do not match')
+            .and('be.visible')
     })
 
     it('@integration TC-12 - Registrar un usuario con Login previamente registrado',()=>{
@@ -183,7 +190,7 @@ describe('HU-01 — Registro de usuario',()=>{
         })
 
         cy.get('.result')
-        .should('be.visible')
-        .and('contain','User already exists')
+            .should('be.visible')
+            .and('contain','User already exists')
     })
 })
