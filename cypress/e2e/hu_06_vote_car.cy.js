@@ -1,6 +1,6 @@
 import RegisterPage from "../support/page/RegisterPage"
 
-describe('Votar por un automóvil',()=>{
+describe('HU-06 — Votar por un automóvil',()=>{
     let user
     before(()=>{
         cy.fixture('userForVote').then((data)=>{

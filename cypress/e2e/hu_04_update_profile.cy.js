@@ -26,11 +26,11 @@ describe('HU-04 — Actualización de perfil de usuario',()=>{
             updatepassword=data
         })
        
-        cy.fixture('LoginForUpdatePasswordParameters').then((data)=>{
+        cy.fixture('loginForUpdatePasswordParameters').then((data)=>{
             passwordparameters=data
         })
 
-        cy.fixture('LoginForUpdatePasswordValidation').then((data)=>{
+        cy.fixture('loginForUpdatePasswordValidation').then((data)=>{
             passwordvalidation=data
         })
     })
